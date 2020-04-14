@@ -205,6 +205,7 @@ ActiveRecord::Schema.define(version: 2020_04_20_113252) do
     t.boolean "local_government_pension_scheme"
     t.string "contract_number"
     t.string "contract_datetime"
+    t.boolean "lot_number_selected_by_customer", default: false
     t.index ["user_id"], name: "index_facilities_management_procurements_on_user_id"
   end
 
