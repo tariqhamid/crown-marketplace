@@ -289,6 +289,14 @@ module FacilitiesManagement
       @procurement.procurement_building_services.any? { |pbs| rate_model.benchmark_rate_for(pbs.code, pbs.service_standard).nil? }
     end
 
+    def any_services_missing_benchmark_price?
+      frozen_rates = CCS::FM::FrozenRate.where(facilities_management_procurement_id: @procurement.id)
+      rate_model = frozen_rates unless frozen_rates.size.zero?
+      rate_model = CCS::FM::Rate if frozen_rates.size.zero?
+
+      @procurement.procurement_building_services.any? { |pbs| rate_model.benchmark_rate_for(pbs.code, pbs.service_standard).nil? }
+    end
+
     def variance_over_30_percent?(new, baseline)
       variance = (new - baseline) / baseline
 
