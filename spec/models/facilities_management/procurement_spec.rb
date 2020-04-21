@@ -493,6 +493,11 @@ RSpec.describe FacilitiesManagement::Procurement, type: :model do
         procurement.save_eligible_suppliers_and_set_state
         expect(procurement.lot_number).not_to be_nil
       end
+      it 'saves the rates to frozen' do
+        procurement.save_eligible_suppliers_and_set_state
+        expect(CCS::FM::FrozenRate.where(facilities_management_procurement_id: procurement.id).size).to eq 155
+        expect(CCS::FM::FrozenRateCard.where(facilities_management_procurement_id: procurement.id).size).to eq 1
+      end
     end
 
     describe '#offer_to_next_supplier' do
@@ -853,6 +858,15 @@ RSpec.describe FacilitiesManagement::Procurement, type: :model do
       context 'when contract_datetime format is created' do
         it 'returns value' do
           expect(fc_current_year_1.contract_datetime).to eq contract_datetime_value
+        end
+      end
+    end
+
+    describe 'frozen rates copied on start state' do
+      context 'when fprocumente start moves to start' do
+        it 'saved rates to frozen rate' do
+          procurement.aasm_state = 'further_competition'
+          expect(procurement.further_competition?).to eq(true)
         end
       end
     end
