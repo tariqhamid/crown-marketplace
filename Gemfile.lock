@@ -172,6 +172,9 @@ GEM
       addressable (~> 2.5)
     equalizer (0.0.11)
     erubi (1.9.0)
+    es5-shim-rails (4.0.1)
+      actionpack (>= 3.1)
+      railties (>= 3.1)
     execjs (2.7.0)
     factory_bot (5.1.1)
       activesupport (>= 4.2.0)
@@ -529,6 +532,7 @@ DEPENDENCIES
   devise (~> 4.7.1)
   dotenv-rails (>= 2.7.5)
   down
+  es5-shim-rails
   factory_bot_rails (>= 5.1.1)
   faker (~> 2.10.2)
   friendly_id (~> 5.2.4)
@@ -582,7 +586,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 2.5.3p105
+   ruby 2.5.8p224
 
 BUNDLED WITH
-   1.17.3
+   2.1.4

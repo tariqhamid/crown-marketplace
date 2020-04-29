@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.5.3'
+ruby '2.5.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.2.4', '>= 5.2.4.2'
@@ -43,6 +43,9 @@ gem 'virtus'
 gem 'jquery-rails', '~> 4.3.5'
 
 gem 'rollbar', '~> 2.24.0'
+
+# Polyfills any missing js for IE
+gem 'es5-shim-rails', '~> 4.0.1'
 
 # for cognito authentication
 gem 'omniauth', '~> 1.9.0'
