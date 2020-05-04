@@ -7,6 +7,8 @@ RSpec.describe FacilitiesManagement::DeliverableMatrixSpreadsheetCreator do
 
   let(:procurement) { create(:facilities_management_procurement) }
 
+  let(:procurement_buyer) { create(:facilities_management_procurement_buyer_detail) }
+
   # rubocop:disable Style/HashSyntax
   let(:data) do
     {
@@ -22,31 +24,53 @@ RSpec.describe FacilitiesManagement::DeliverableMatrixSpreadsheetCreator do
     }
   end
 
+  let(:uvalsAA) do
+    [
+      { :user_id => procurement_buyer.user.id, 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'e60f5b57-5f15-604c-b729-a689ede34a99', 'title_text' => nil, 'example_text' => nil },
+      { :user_id => procurement_buyer.user.id, 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
+      { :user_id => procurement_buyer.user.id, 'service_code' => 'K.3', 'uom_value' => '48', 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
+      { :user_id => procurement_buyer.user.id, :service_code => 'C.5', :uom_value => 5, :building_id => 'e60f5b57-5f15-604c-b729-a689ede34a99', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
+      { :user_id => procurement_buyer.user.id, :service_code => 'C.5', :uom_value => 5, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
+      { :user_id => procurement_buyer.user.id, :service_code => 'M.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'CAFM' },
+      { :user_id => procurement_buyer.user.id, :service_code => 'N.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'Help' }
+    ]
+  end
+
   let(:uvals) do
     [
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'e60f5b57-5f15-604c-b729-a689ede34a99', 'title_text' => nil, 'example_text' => nil },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'K.3', 'uom_value' => '48', 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'C.5', :uom_value => 5, :building_id => 'e60f5b57-5f15-604c-b729-a689ede34a99', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'C.5', :uom_value => 5, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'M.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'CAFM' },
-      { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'N.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'Help' }
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'e60f5b57-5f15-604c-b729-a689ede34a99', 'title_text' => nil, 'example_text' => nil },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'I.1', 'uom_value' => service_hours, 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', 'service_code' => 'K.3', 'uom_value' => '48', 'building_id' => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', 'title_text' => nil, 'example_text' => nil },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'C.5', :uom_value => 5, :building_id => 'e60f5b57-5f15-604c-b729-a689ede34a99', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'C.5', :uom_value => 5, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'The sum total of number of floors per lift' },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'M.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'CAFM' },
+        { :user_id => 'dGFyaXEuaGFtaWRAY3Jvd25jb21tZXJjaWFsLmdvdi51aw==\n', :service_code => 'N.1', :uom_value => 1000, :building_id => 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b', :title_text => nil, :example_text => nil, :spreadsheet_label => 'Help' }
     ]
   end
 
   before do
-    service_hours[:monday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
-    service_hours[:tuesday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :all_day, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
-    service_hours[:wednesday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :hourly, start_hour: '08', start_minute: '00', start_ampm: 'am', end_hour: '05', end_minute: '30', end_ampm: 'PM', uom: 0)
-    service_hours[:thursday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
-    service_hours[:friday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :all_day, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
-    service_hours[:saturday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :hourly, start_hour: '10', start_minute: '00', start_ampm: 'pm', end_hour: '05', end_minute: '30', end_ampm: 'AM', uom: 0)
-    service_hours[:sunday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
+    service_hours[:monday] = build(:facilities_management_service_hour_choice_monday)
+    service_hours[:tuesday] = build(:facilities_management_service_hour_choice_tuesday)
+    service_hours[:wednesday] = build(:facilities_management_service_hour_choice_wednesday)
+    service_hours[:thursday] = build(:facilities_management_service_hour_choice_thursday)
+    service_hours[:friday] = build(:facilities_management_service_hour_choice_friday)
+    service_hours[:saturday] = build(:facilities_management_service_hour_choice_saturday)
+    service_hours[:sunday] = build(:facilities_management_service_hour_choice_sunday)
+
+    #  service_hours[:monday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
+    # service_hours[:tuesday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :all_day, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
+    # service_hours[:wednesday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :hourly, start_hour: '08', start_minute: '00', start_ampm: 'am', end_hour: '05', end_minute: '30', end_ampm: 'PM', uom: 0)
+    # service_hours[:thursday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
+    # service_hours[:friday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :all_day, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
+    # service_hours[:saturday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :hourly, start_hour: '10', start_minute: '00', start_ampm: 'pm', end_hour: '05', end_minute: '30', end_ampm: 'AM', uom: 0)
+    # service_hours[:sunday] = FacilitiesManagement::ServiceHourChoice.new(service_choice: :not_required, uom: 0, start_hour: '', start_minute: '', start_ampm: 'AM', end_hour: '', end_minute: '', end_ampm: 'AM')
   end
 
   # rubocop:disable RSpec/BeforeAfterAll
   context 'and add dummy buildings to a db' do
-    before :all do
+     before :all do
+    # before :each do
+      #  let(:procurement_buyerZZ) { create(:facilities_management_procurement_buyer_detail) }
       @selected_buildings2 = [
         OpenStruct.new(
           id: 'd92b0939-d7c4-0d54-38dd-a2a2709cb95b',
@@ -109,14 +133,16 @@ RSpec.describe FacilitiesManagement::DeliverableMatrixSpreadsheetCreator do
       # populate db with dub buildings
       # rubocop:disable RSpec/InstanceVariable
       @selected_buildings2.each do |b|
-        FacilitiesManagement::Building.delete b.id
-        new_building = FacilitiesManagement::Building.new(
-          id: b.id,
-          user: create(:user),
-          user_email: b.user_email,
-          updated_by: Base64.encode64('test@example.com'),
-          building_json: b.building_json
-        )
+         FacilitiesManagement::Building.delete b.id
+         new_building = FacilitiesManagement::Building.new(
+           id: b.id,
+            user: create(:user),
+            user_email: b.user_email,
+           updated_by: Base64.encode64('test@example.com'),
+           building_json: b.building_json
+      )
+
+
         # new_building[:building_json]['building-type'] = 'General office - Customer Facing',
         # new_building[:building_json]['address'][:'fm-nuts-region'] = 'Westminster'
 
@@ -127,7 +153,8 @@ RSpec.describe FacilitiesManagement::DeliverableMatrixSpreadsheetCreator do
     end
     # rubocop:enable Style/HashSyntax
 
-    after :all do
+      after :all do
+        # after :each do
       # teardown
       @selected_buildings2.each do |b|
         FacilitiesManagement::Building.delete b.id
@@ -138,8 +165,9 @@ RSpec.describe FacilitiesManagement::DeliverableMatrixSpreadsheetCreator do
     # rubocop:enable RSpec/BeforeAfterAll
     # rubocop:enable RSpec/InstanceVariable
 
-    it 'verify for ,service periods worksheet, worksheet headers', skip: true do
-      spreadsheet_builder = described_class.new(procurement.id)
+    it 'verify for ,service periods worksheet, worksheet headers', skip: false do
+      spreadsheet_builder = described_class.new(procurement_buyer.id)
+      # spreadsheet_builder = described_class.new(procurement.id)
       spreadsheet = spreadsheet_builder.build
 
       IO.write('/tmp/deliverable_matrix_3_1year.xlsx', spreadsheet.to_stream.read)

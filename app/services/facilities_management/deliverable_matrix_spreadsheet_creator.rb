@@ -386,6 +386,7 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
     sheet.add_row ['2. Contract requirements'], style: bold_style
     add_initial_call_off_period(sheet)
     add_mobilisation_period(sheet)
+
     sheet.add_row ['Date of First Indexation', (@procurement.initial_call_off_start_date + 1.year).strftime('%d/%m/%Y')]
     add_extension_periods(sheet)
     add_tupe(sheet)

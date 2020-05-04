@@ -9,6 +9,19 @@ FactoryBot.define do
     procurement_buildings { build_list :facilities_management_procurement_building, 1 }
   end
 
+  # facilities_management_procurement_building_service_i1
+  factory :facilities_management_procurement_buyer_detail, class: FacilitiesManagement::Procurement do
+    contract_name { Faker::Name.unique.name }
+    estimated_cost_known { 12345 }
+    tupe { false }
+    initial_call_off_period { 1 }
+    service_codes { ['C.1', 'C.2'] }
+    association :user, :with_detail
+    initial_call_off_start_date { Time.zone.now + 6.months }
+      # procurement_buildings { build_list :facilities_management_procurement_building, 2 }
+    procurement_buildings { build_list :facilities_management_procurement_building_service_i1, 2 }
+  end
+
   factory :facilities_management_procurement_with_extension_periods, parent: :facilities_management_procurement do
     initial_call_off_start_date { Time.zone.now + 6.months }
     mobilisation_period_required { true }
