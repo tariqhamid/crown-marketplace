@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-if [ "$APP_RUN_SIDEKIQ" = 'FALSE' ]; then
+if [ "$APP_RUN_SIDEKIQ" = 'TRUE' ]; then
+  bundle exec sidekiq -C ./config/sidekiq.yml -e production
+else
   echo TCPAddr $CLAMAV_SERVER_IP > /etc/clamav/clamd.conf && echo TCPSocket 3310 >> /etc/clamav/clamd.conf
 
   bundle exec rails db:migrate
@@ -25,6 +27,4 @@ if [ "$APP_RUN_SIDEKIQ" = 'FALSE' ]; then
   fi
 
   bundle exec rails server
-else
-  bundle exec sidekiq -C ./config/sidekiq.yml -e production
 fi
