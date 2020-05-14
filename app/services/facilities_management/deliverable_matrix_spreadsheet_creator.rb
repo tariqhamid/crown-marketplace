@@ -3,7 +3,7 @@ require 'axlsx_rails'
 require 'roo'
 
 class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
-  include FacilitiesManagement::Beta::SummaryHelper
+  include FacilitiesManagement::SummaryHelper
   include ActionView::Helpers::SanitizeHelper
 
   def initialize(contract_id)
@@ -65,12 +65,12 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
         unless units_of_measure_values.nil?
           p.workbook.add_worksheet(name: 'Volume') do |sheet|
             add_header_row(sheet, ['Service Reference',	'Service Name',	'Metric per annum'])
-            number_volume_services = add_volumes_information(sheet)
+            number_volume_services = add_volumes_information_da(sheet)
             style_volume_sheet(sheet, standard_column_style, number_volume_services)
           end
         end
 
-        add_service_periods_worksheet(p, standard_column_style)
+        add_service_periods_worksheet(p, standard_column_style, units_of_measure_values)
 
         add_customer_and_contract_details(p) if @procurement
 
@@ -87,10 +87,10 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
 
   private
 
-  def add_service_periods_worksheet(package, standard_column_style)
+  def add_service_periods_worksheet(package, standard_column_style, units)
     package.workbook.add_worksheet(name: 'Service Periods') do |sheet|
       add_header_row(sheet, ['Service Reference', 'Service Name', 'Specific Service Periods'])
-      rows_added = add_service_periods(sheet)
+      rows_added = add_service_periods(sheet, units)
       style_service_periods_matrix_sheet(sheet, standard_column_style, rows_added) if sheet.rows.size > 1
     end
   end
@@ -264,26 +264,32 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
     end
   end
 
-  def add_volumes_information(sheet)
+  # rubocop:disable Metrics/AbcSize
+  def add_volumes_information_da(sheet)
     number_column_style = sheet.styles.add_style sz: 12, border: { style: :thin, color: '00000000' }
 
+    added_rows = 0
     allowed_volume_services = services_data.keep_if { |service| list_of_allowed_volume_services.include? service['code'] }
 
     allowed_volume_services.each do |s|
+      next if CCS::FM::Service.gia_services.include? s['code']
+
       new_row = [s['code'], s['name'], s['metric']]
       @active_procurement_buildings.each do |b|
-        uvs = @units_of_measure_values.flatten.select { |u| b.building_id == u[:building_id] }
+        uvs = units_of_measure_values.flatten.select { |u| b.building_id == u[:building_id] }
         suv = uvs.find { |u| s['code'] == u[:service_code] }
 
         new_row << calculate_uom_value(suv) if suv
         new_row << nil unless suv
       end
 
+      added_rows += 1
       sheet.add_row new_row, style: number_column_style
     end
 
-    allowed_volume_services.count
+    added_rows
   end
+  # rubocop:enable Metrics/AbcSize
 
   def style_volume_sheet(sheet, style, number_volume_services)
     column_widths = [15, 100, 50, 50]
@@ -294,7 +300,7 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
     sheet.column_widths(*column_widths)
   end
 
-  def add_service_periods(sheet)
+  def add_service_periods(sheet, units)
     rows_added = 0
     standard_style = sheet.styles.add_style sz: 12, border: { style: :thin, color: '00000000' }, alignment: { wrap_text: true, vertical: :center, horizontal: :center }, fg_color: '6E6E6E'
 
@@ -302,7 +308,7 @@ class FacilitiesManagement::DeliverableMatrixSpreadsheetCreator
       Date::DAYNAMES.rotate(1).each do |day|
         row_values = [service['code'], service['name'], day]
         buildings_data.each do |building|
-          service_measure = units_of_measure_values.flatten.select { |measure| measure[:service_code] == service['code'] && measure[:building_id] == building[:building_id] }.first
+          service_measure = units.flatten.select { |measure| measure[:service_code] == service['code'] && measure[:building_id] == building[:building_id] }.first
 
           row_values << add_service_measure_row_value(service_measure, day)
         end

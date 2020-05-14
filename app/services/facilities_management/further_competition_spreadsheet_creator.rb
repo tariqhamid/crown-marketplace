@@ -14,7 +14,22 @@ class FacilitiesManagement::FurtherCompetitionSpreadsheetCreator < FacilitiesMan
           building_id: building.building_id,
           service_code: procurement_building_service.code,
           uom_value: procurement_building_service.uval,
-          service_standard: procurement_building_service.service_standard
+          service_standard: procurement_building_service.service_standard,
+          service_hours: procurement_building_service.service_hours
+        }
+      end
+    end.flatten
+  end
+
+  def units_of_measure_values_for_volume
+    @units_of_measure_values_for_volume ||= @active_procurement_buildings.map do |building|
+      building.procurement_building_services.map do |procurement_building_service|
+        {
+          building_id: building.building_id,
+          service_code: procurement_building_service.code,
+          uom_value: procurement_building_service.uval,
+          service_standard: procurement_building_service.service_standard,
+          service_hours: procurement_building_service.service_hours
         }
       end
     end.flatten
@@ -50,10 +65,12 @@ class FacilitiesManagement::FurtherCompetitionSpreadsheetCreator < FacilitiesMan
           style_service_matrix_sheet(sheet, standard_column_style, number_rows_added)
         end
 
-        unless units_of_measure_values.nil?
+        units_of_measure_values
+        units_of_measure_values_for_volume
+        unless @units_of_measure_values_for_volume.nil?
           p.workbook.add_worksheet(name: 'Volume') do |sheet|
             add_header_row(sheet, ['Service Reference',	'Service Name',	'Metric per annum'])
-            number_volume_services = add_volumes_information(sheet)
+            number_volume_services = add_volumes_information_fc(sheet)
             style_volume_sheet(sheet, standard_column_style, number_volume_services)
           end
         end
@@ -64,8 +81,29 @@ class FacilitiesManagement::FurtherCompetitionSpreadsheetCreator < FacilitiesMan
   end
   # rubocop:enable Metrics/AbcSize
 
+  def add_volumes_information_fc(sheet)
+    number_column_style = sheet.styles.add_style sz: 12, border: { style: :thin, color: '00000000' }
+
+    allowed_volume_services = services_data.keep_if { |service| list_of_allowed_volume_services.include? service['code'] }
+
+    allowed_volume_services.each do |s|
+      new_row = [s['code'], s['name'], s['metric']]
+      @active_procurement_buildings.each do |b|
+        uvs = @units_of_measure_values_for_volume.flatten.select { |u| b.building_id == u[:building_id] }
+        suv = uvs.find { |u| s['code'] == u[:service_code] }
+
+        new_row << calculate_uom_value(suv) if suv
+        new_row << nil unless suv
+      end
+
+      sheet.add_row new_row, style: number_column_style
+    end
+
+    allowed_volume_services.count
+  end
+
   def add_other_competition_worksheets(package, standard_column_style, standard_bold_style, start_date, current_user)
-    add_service_periods_worksheet(package, standard_column_style)
+    add_service_periods_worksheet(package, standard_column_style, @units_of_measure_values_for_volume)
 
     add_shortlist_details(package, standard_column_style, standard_bold_style, start_date, current_user)
 
